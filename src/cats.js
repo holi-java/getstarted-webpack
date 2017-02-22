@@ -1,2 +1,2 @@
-var cats = ['dave', 'henry', 'martha'];
+var cats = Array.of('dave', 'henry', 'martha');
 module.exports = cats;
