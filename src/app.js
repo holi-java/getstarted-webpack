@@ -1,2 +1,2 @@
-cats = require('./cats.js');
+import cats from './cats';
 console.log(cats);
