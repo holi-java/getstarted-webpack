@@ -57,8 +57,13 @@ describe('options', () => {
             });
         });
 
-        xit('chunkFilename', (done) => {
-
+        it('chunkFilename', (done) => {
+            compile({entry: './chunk.js', output: {chunkFilename: '[name].bundle.js'}}).then(({logs}, files) => {
+                expect(logs.files).toEqual(['/bundle.js', '/1.bundle.js']);
+                expect(files['/bundle.js']).not.toEqual(expect.stringContaining('bar'));
+                expect(files['/1.bundle.js']).toEqual(expect.stringContaining('bar'));
+                done();
+            });
         });
 
         it('pathinfo', (done) => {
