@@ -1,4 +1,4 @@
-import cats from './cats';
+import cats from 'babel!./cats';
 import $ from 'jquery';
 
 $('body').append($('<ul>').append(cats.map((cat) => {
