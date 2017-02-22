@@ -1,10 +1,13 @@
 let {optimize}=require('webpack');
 
 module.exports = {
-    entry: ['babel-polyfill', './src/app.js'],
+    entry: {
+        app: ['babel-polyfill', './src/app.js'],
+        cats: ['./src/cats.js']
+    },
     output: {
         path: './dist',
-        filename: 'app.bundle.js'
+        filename: '[name].bundle.js'
     },
     module: {
         loaders: [
