@@ -1,9 +1,10 @@
 let {optimize}=require('webpack');
 
 module.exports = {
+    context: __dirname + '/src',
     entry: {
-        app: ['./src/app.js'],
-        cats: ['./src/cats.js']
+        app: ['./app.js'],
+        cats: ['./cats.js']
     },
     output: {
         path: './dist',
