@@ -1,7 +1,4 @@
 import cats from 'babel!./cats';
-import $ from 'jquery';
 import './app.css';
 
-$('body').append($('<ul>').append(cats.map((cat) => {
-    return $('<li>').text(cat);
-})));
+document.body.innerHTML = `<ul>${cats.map((cat) => `<li>${cat}</li>`).join('')}</ul>`;

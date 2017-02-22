@@ -2,7 +2,7 @@ let {optimize}=require('webpack');
 
 module.exports = {
     entry: {
-        app: ['babel-polyfill', './src/app.js'],
+        app: ['./src/app.js'],
         cats: ['./src/cats.js']
     },
     output: {
@@ -15,15 +15,6 @@ module.exports = {
             {test: /\.css$/, loader: 'style!css'}
         ]
     },
-    plugins: [
-        new optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false,
-            },
-            output: {
-                comments: false,
-            },
-        }),
-    ]
+    plugins: []
 };
 
