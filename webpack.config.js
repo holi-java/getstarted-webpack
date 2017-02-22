@@ -1,3 +1,5 @@
+let {optimize}=require('webpack');
+
 module.exports = {
     entry: ['babel-polyfill', './src/app.js'],
     output: {
@@ -12,6 +14,16 @@ module.exports = {
                 loader: 'babel-loader'
             }
         ]
-    }
+    },
+    plugins: [
+        new optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false,
+            },
+            output: {
+                comments: false,
+            },
+        }),
+    ]
 };
 
