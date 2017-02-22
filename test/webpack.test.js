@@ -1,117 +1,89 @@
 describe('options', () => {
 
-    it('context path must be absolute', (done) => {
-        compile({context: __dirname + '/fixtures/other', entry: './app.js'}).then(function ({logs}, files) {
-            expect(logs.files).toEqual(['/bundle.js']);
-            expect(files['/bundle.js']).toEqual(expect.stringContaining(`version`));
-            done();
-        });
-    });
+    it('context path must be absolute', compile({
+        context: __dirname + '/fixtures/other',
+        entry: './app.js'
+    }).then(function ({logs}, files) {
+        expect(logs.files).toEqual(['/bundle.js']);
+        expect(files['/bundle.js']).toMatch(`version`);
+    }));
+
 
     describe('entry', () => {
-        it('single', (done) => {
-            compile('./cats.js').then(function ({logs}, files) {
-                expect(logs.files).toEqual(['/bundle.js']);
-                expect(files['/bundle.js']).toEqual(expect.stringContaining(`['mimi']`));
-                done();
-            });
-        });
+        it('single', compile('./cats.js').then(function ({logs}, files) {
+            expect(logs.files).toEqual(['/bundle.js']);
+            expect(files['/bundle.js']).toMatch(`['mimi']`);
+        }));
 
-        it('single entry with multi chunk files', (done) => {
-            compile(['./cats.js', './foo.js']).then(function ({logs}, files) {
-                expect(logs.files).toEqual(['/bundle.js']);
-                let source = files['/bundle.js'];
-                expect(source).toEqual(expect.stringContaining(`['mimi']`));
-                expect(source).toEqual(expect.stringContaining(`bar`));
-                done();
-            });
-        });
+        it('single entry with multi chunk files', compile(['./cats.js', './foo.js']).then(function ({logs}, files) {
+            expect(logs.files).toEqual(['/bundle.js']);
+            let source = files['/bundle.js'];
+            expect(source).toMatch(`['mimi']`);
+            expect(source).toMatch(`bar`);
+        }));
 
-        it('multi', (done) => {
-            const entry = {
+        it('multi', compile({
+            entry: {
                 cat1: './cats.js',
                 cat2: './cats.js'
-            };
-            compile({entry: entry, output: {filename: '[name].js'}}).then(function ({logs}, files) {
-                expect(logs.files).toHaveLength(2);
-                expect(files['/cat1.js']).toEqual(files['/cat2.js']);
-                done();
-            });
-        });
+            },
+            output: {filename: '[name].js'}
+        }).then(function ({logs}, files) {
+            expect(logs.files.length).toEqual(2);
+            expect(files['/cat1.js']).toEqual(files['/cat2.js']);
+        }));
     });
 
 
     describe('output', () => {
-        it('path', (done) => {
-            compile({entry: './cats.js', output: {path: 'dist'}}).then(function ({logs}, files) {
-                expect(logs.mkdirp).toEqual(['dist']);
-                done();
-            });
-        });
+        it('path', compile({entry: './cats.js', output: {path: 'dist'}}).then(function ({logs}, files) {
+            expect(logs.mkdirp).toEqual(['dist']);
+        }));
 
-        it('filename', (done) => {
-            compile({entry: './cats.js', output: {filename: 'cats.dist.js'}}).then(function ({logs}, files) {
-                expect(logs.files).toEqual(['/cats.dist.js']);
-                expect(files['/cats.dist.js']).toEqual(expect.stringContaining(`['mimi']`));
-                done();
-            });
-        });
+        it('filename', compile({entry: './cats.js', output: {filename: 'cats.dist.js'}}).then(function ({logs}, files) {
+            expect(logs.files).toEqual(['/cats.dist.js']);
+            expect(files['/cats.dist.js']).toMatch(`['mimi']`);
+        }));
 
-        it('chunkFilename', (done) => {
-            compile({entry: './chunk.js', output: {chunkFilename: '[name].bundle.js'}}).then(({logs}, files) => {
-                expect(logs.files).toEqual(['/bundle.js', '/1.bundle.js']);
-                expect(files['/bundle.js']).not.toEqual(expect.stringContaining('bar'));
-                expect(files['/1.bundle.js']).toEqual(expect.stringContaining('bar'));
-                done();
-            });
-        });
+        it('chunkFilename', compile({
+            entry: './chunk.js',
+            output: {chunkFilename: '[name].bundle.js'}
+        }).then(({logs}, files) => {
+            expect(logs.files).toEqual(['/bundle.js', '/1.bundle.js']);
+            expect(files['/bundle.js']).not.toMatch('bar');
+            expect(files['/1.bundle.js']).toMatch('bar');
+        }));
 
-        it('pathinfo', (done) => {
-            compile({entry: './cats.js', output: {pathinfo: true}}).then(function ({logs}, files) {
-                expect(logs.files).toEqual(['/bundle.js']);
-                expect(files['/bundle.js']).toEqual(expect.stringContaining(`__webpack_require__(/*! ./lib */`));
-                done();
-            });
-        });
+        it('pathinfo', compile({entry: './cats.js', output: {pathinfo: true}}).then(function ({logs}, files) {
+            expect(logs.files).toEqual(['/bundle.js']);
+            expect(files['/bundle.js']).toMatch(/__webpack_require__\(\/\*! \.\/lib \*\//);
+        }));
 
-        it('library & libraryTarget', (done) => {
-            let options = {entry: {cats: './cats.js'}, output: {library: '[name]', libraryTarget: 'this'}};
-            compile(options).then(function ({logs}, files) {
-                expect(logs.files).toEqual(['/bundle.js']);
-                expect(files['/bundle.js']).toEqual(expect.stringContaining(`this["cats"]`));
-                done();
-            });
-        });
+        it('library & libraryTarget', compile({
+            entry: {cats: './cats.js'},
+            output: {library: '[name]', libraryTarget: 'this'}
+        }).then(function ({logs}, files) {
+            expect(logs.files).toEqual(['/bundle.js']);
+            expect(files['/bundle.js']).toMatch(/this\["cats"\]/);
+        }));
     });
 
     describe('module', () => {
-        it('loaders', (done) => {
-            let options = {
-                entry: './es5.js',
-                module: {
-                    loaders: [
-                        {loader: 'babel'}
-                    ]
-                }
-            };
-            compile(options).then(function (_, files) {
-                expect(files['/bundle.js']).toEqual(expect.stringContaining(`bar`));
-                done();
-            });
-        });
+        it('loaders', compile({
+            entry: './es5.js',
+            module: {loaders: [{loader: 'babel'}]}
+        }).then(function (_, files) {
+            expect(files['/bundle.js']).toMatch(`bar`);
+        }));
 
-        it('noParse', (done) => {
-            let options = {
-                entry: './es5.js',
-                module: {
-                    loaders: [{loader: 'babel'}],
-                    noParse: /es5\.js/
-                }
-            };
-            compile(options).then(function (_, files) {
-                expect(files['/bundle.js']).not.toEqual(expect.stringContaining(`bar`));
-                done();
-            });
-        });
+        it('noParse', compile({
+            entry: './es5.js',
+            module: {
+                loaders: [{loader: 'babel'}],
+                noParse: /es5\.js/
+            }
+        }).then(function (_, files) {
+            expect(files['/bundle.js']).not.toMatch(`bar`);
+        }));
     });
 });

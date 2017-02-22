@@ -36,29 +36,34 @@ function compiler(options) {
 }
 
 export function compile(options) {
-    let c = compiler(optional(options));
     return {
-        then: function (resolve) {
-            let error = {};
-            c.run(function (err, stats) {
-                if (err) {
-                    resolve({error: err});
-                    return;
-                }
-                let compilation = stats.compilation;
-                stats = stats.toJson({
-                    modules: true,
-                    reasons: true
+        then(expectations){
+            return (done) => {
+                let c = compiler(optional(options));
+                c.run(function (err, stats) {
+                    if (err) {
+                        fail(err);
+                        return done && done();
+                    }
+                    let compilation = stats.compilation;
+                    stats = stats.toJson({
+                        modules: true,
+                        reasons: true
+                    });
+                    if (stats.errors.length > 0) {
+                        fail(stats.errors);
+                        return done && done();
+                    }
+                    stats.logs = c.logs;
+                    expectations(stats, c.files, compilation);
+                    done();
                 });
-                if (stats.errors.length > 0) {
-                    resolve({error: stats.errors});
-                    return;
-                }
-                stats.logs = c.logs;
-                resolve(stats, c.files, compilation);
-            });
+            };
         }
     };
 }
 
-if (global) global.compile = compile;
+
+if (global) {
+    global.compile = compile;
+}

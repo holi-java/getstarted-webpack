@@ -1,65 +1,50 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-
-function compileWith(options = {}) {
-    return compile({
-        entry: {cats: './cats', foo: './chunk'},
-        output: {filename: '[name].dist.js', chunkFilename: '[name].dist.js'},
-        plugins: [new HtmlWebpackPlugin(options)]
-    });
-}
+describe('html-webpack-plugin', () => {
 
 
-test(`generate default 'index.html' with all entries & chunk files in body with script tag`, (done) => {
-    compileWith().then(({logs}, files) => {
+    function compileWith(options = {}) {
+        return compile({
+            entry: {cats: './cats', foo: './chunk'},
+            output: {filename: '[name].dist.js', chunkFilename: '[name].dist.js'},
+            plugins: [new HtmlWebpackPlugin(options)]
+        });
+    }
+
+
+    it(`generate default 'index.html' with all entries & chunk files in body with script tag`, compileWith().then(({logs}, files) => {
         expect(logs.files).toEqual(['/cats.dist.js', '/foo.dist.js', '/2.dist.js', '/index.html']);
         let html = files['/index.html'];
-        expect(html).toEqual(expect.stringContaining(`<title>Webpack App</title>`));
-        expect(html).toEqual(expect.stringContaining(`src="cats.dist.js"`));
-        expect(html).toEqual(expect.stringContaining(`src="foo.dist.js"`));
-        expect(html).not.toEqual(expect.stringContaining(`src="2.dist.js"`));
-        expect(files['/2.dist.js']).toEqual(expect.stringContaining('./foo.js'));
-        done();
-    });
-});
+        expect(html).toMatch(`<title>Webpack App</title>`);
+        expect(html).toMatch(`src="cats.dist.js"`);
+        expect(html).toMatch(`src="foo.dist.js"`);
+        expect(html).not.toMatch(`src="2.dist.js"`);
+        expect(files['/2.dist.js']).toMatch('./foo.js');
+    }));
 
-test(`custom page title`, (done) => {
-    compileWith({title: 'foo'}).then(({logs}, files) => {
+    it(`custom page title`, compileWith({title: 'foo'}).then(({logs}, files) => {
         let html = files['/index.html'];
-        expect(html).toEqual(expect.stringContaining(`<title>foo</title>`));
-        done();
-    });
-});
+        expect(html).toMatch(`<title>foo</title>`);
+    }));
 
-test(`custom filename to saving generated html`, (done) => {
-    compileWith({filename: 'foo.html'}).then(({logs}, files) => {
+    it(`custom filename to saving generated html`, compileWith({filename: 'foo.html'}).then(({logs}, files) => {
         expect(logs.files).toContain('/foo.html');
-        done();
-    });
-});
+    }));
 
 
-test(`using template to generate html`, (done) => {
-    compileWith({template: 'template.html'}).then(({logs}, files) => {
+    it(`using template to generate html`, compileWith({template: 'template.html'}).then(({logs}, files) => {
         let html = files['/index.html'];
-        expect(html).toEqual(expect.stringContaining(`http-equiv="author"`));
-        expect(html).toEqual(expect.stringContaining(`src="cats.dist.js"`));
-        expect(html).toEqual(expect.stringContaining(`src="foo.dist.js"`));
-        expect(html).not.toEqual(expect.stringContaining(`src="2.dist.js"`));
-        done();
-    });
-});
+        expect(html).toMatch(`http-equiv="author"`);
+        expect(html).toMatch(`src="cats.dist.js"`);
+        expect(html).toMatch(`src="foo.dist.js"`);
+        expect(html).not.toMatch(`src="2.dist.js"`);
+    }));
 
 
-test(`add some chunks scripts files`, (done) => {
-    let options = {
-        chunks:['cats']
-    };
-    compileWith(options).then(({logs}, files) => {
+    it(`add some chunks scripts files`, compileWith({chunks: ['cats']}).then(({logs}, files) => {
         expect(logs.files).toEqual(['/cats.dist.js', '/foo.dist.js', '/2.dist.js', '/index.html']);
         let html = files['/index.html'];
-        expect(html).toEqual(expect.stringContaining(`src="cats.dist.js"`));
-        expect(html).not.toEqual(expect.stringContaining(`src="foo.dist.js"`));
-        expect(html).not.toEqual(expect.stringContaining(`src="2.dist.js"`));
-        done();
-    });
+        expect(html).toMatch(`src="cats.dist.js"`);
+        expect(html).not.toMatch(`src="foo.dist.js"`);
+        expect(html).not.toMatch(`src="2.dist.js"`);
+    }));
 });
