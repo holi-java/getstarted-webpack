@@ -9,7 +9,9 @@ module.exports = {
     output: {
         path: './dist',
         filename: '[name].bundle.js',
-        pathinfo: true
+        pathinfo: true,
+        library: '[id]',
+        libraryTarget:'this'
     },
     module: {
         loaders: [
