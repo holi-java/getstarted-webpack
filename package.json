@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node $NODE_DEBUG_OPTION node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=jasmine.json"
+    "test": "APP_ENV=dev node $NODE_DEBUG_OPTION node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=jasmine.json"
   },
   "keywords": [],
   "author": "",
